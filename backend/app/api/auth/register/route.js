@@ -14,7 +14,7 @@ export async function POST(request) {
     await connectDB();
 
     const body = await request.json();
-    const { name, email, password, role } = body;
+    const { name, email, password } = body;
 
     if (!name || !email || !password) {
       return withCors(
@@ -51,7 +51,7 @@ export async function POST(request) {
       name,
       email: email.toLowerCase(),
       passwordHash,
-      role: role === "admin" ? "admin" : "staff"
+      role: "staff"
     });
 
     const token = signToken(user);
@@ -66,7 +66,7 @@ export async function POST(request) {
             id: user._id,
             name: user.name,
             email: user.email,
-            role: user.role
+            role: "staff"
           }
         },
         { status: 201 }

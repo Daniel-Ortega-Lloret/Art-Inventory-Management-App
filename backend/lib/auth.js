@@ -11,7 +11,7 @@ export function signToken(user) {
     {
       userId: user._id.toString(),
       email: user.email,
-      role: user.role,
+      role: "staff",
       name: user.name
     },
     JWT_SECRET,
@@ -40,16 +40,5 @@ export function requireAuth(request) {
     throw new Error("Authentication token missing");
   }
 
-  const decoded = verifyToken(token);
-  return decoded;
-}
-
-export function requireRole(request, allowedRoles = []) {
-  const user = requireAuth(request);
-
-  if (!allowedRoles.includes(user.role)) {
-    throw new Error("You do not have permission to perform this action");
-  }
-
-  return user;
+  return verifyToken(token);
 }

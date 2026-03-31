@@ -27,7 +27,7 @@ export default function Navbar() {
         {user ? (
           <>
             <span className="user-badge">
-              {user.name} ({user.role})
+              {user.name}
             </span>
             <button onClick={handleLogout}>Logout</button>
           </>

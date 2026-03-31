@@ -28,7 +28,10 @@ export async function GET(request) {
     return withCors(
       NextResponse.json({
         success: true,
-        user
+        user: {
+          ...user.toObject(),
+          role: "staff"
+        }
       })
     );
   } catch (error) {

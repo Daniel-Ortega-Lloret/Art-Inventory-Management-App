@@ -1,51 +1,56 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Artwork from "@/models/Artwork";
-import { requireRole } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { withCors, handleOptions } from "@/lib/cors";
 
 export function OPTIONS() {
   return handleOptions();
 }
 
-export async function GET(request, { params }) {
+export async function GET(request, context) {
   try {
-    requireRole(request, ["admin", "staff"]);
+    requireAuth(request);
     await connectDB();
 
-    const artwork = await Artwork.findById(params.id);
+    const { id } = await context.params;
+    const artwork = await Artwork.findById(id);
 
     if (!artwork) {
       return withCors(
         NextResponse.json(
-        { success: false, error: "Artwork not found" },
-        { status: 404 }
-      ));
+          { success: false, error: "Artwork not found" },
+          { status: 404 }
+        )
+      );
     }
 
     return withCors(
-        NextResponse.json({
-      success: true,
-      data: artwork
-    }));
+      NextResponse.json({
+        success: true,
+        data: artwork
+      })
+    );
   } catch (error) {
     return withCors(
-        NextResponse.json(
-      { success: false, error: error.message },
-      { status: 400 }
-    ));
+      NextResponse.json(
+        { success: false, error: error.message },
+        { status: 400 }
+      )
+    );
   }
 }
 
-export async function PUT(request, { params }) {
+export async function PUT(request, context) {
   try {
-    requireRole(request, ["admin", "staff"]);
+    requireAuth(request);
     await connectDB();
 
+    const { id } = await context.params;
     const body = await request.json();
 
     const artwork = await Artwork.findByIdAndUpdate(
-      params.id,
+      id,
       {
         ...body,
         ...(body.title ? { title: body.title.trim() } : {}),
@@ -60,51 +65,58 @@ export async function PUT(request, { params }) {
     if (!artwork) {
       return withCors(
         NextResponse.json(
-        { success: false, error: "Artwork not found" },
-        { status: 404 }
-      ));
+          { success: false, error: "Artwork not found" },
+          { status: 404 }
+        )
+      );
     }
 
     return withCors(
-        NextResponse.json({
-      success: true,
-      message: "Artwork updated successfully",
-      data: artwork
-    }));
+      NextResponse.json({
+        success: true,
+        message: "Artwork updated successfully",
+        data: artwork
+      })
+    );
   } catch (error) {
     return withCors(
-        NextResponse.json(
-      { success: false, error: error.message },
-      { status: 400 }
-    ));
+      NextResponse.json(
+        { success: false, error: error.message },
+        { status: 400 }
+      )
+    );
   }
 }
 
-export async function DELETE(request, { params }) {
+export async function DELETE(request, context) {
   try {
-    requireRole(request, ["admin"]);
+    requireAuth(request);
     await connectDB();
 
-    const artwork = await Artwork.findByIdAndDelete(params.id);
+    const { id } = await context.params;
+    const artwork = await Artwork.findByIdAndDelete(id);
 
     if (!artwork) {
       return withCors(
         NextResponse.json(
-        { success: false, error: "Artwork not found" },
-        { status: 404 }
-      ));
+          { success: false, error: "Artwork not found" },
+          { status: 404 }
+        )
+      )
     }
 
     return withCors(
-        NextResponse.json({
-      success: true,
-      message: "Artwork deleted successfully"
-    }));
+      NextResponse.json({
+        success: true,
+        message: "Artwork deleted successfully"
+      })
+    );
   } catch (error) {
     return withCors(
-        NextResponse.json(
-      { success: false, error: error.message },
-      { status: error.message.includes("permission") ? 403 : 400 }
-    ));
+      NextResponse.json(
+        { success: false, error: error.message },
+        { status: 400 }
+      )
+    );
   }
 }

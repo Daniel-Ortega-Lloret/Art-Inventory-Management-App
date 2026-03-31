@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
-import { useAuth } from "../context/useAuth";
 
 export default function ArtworksPage() {
-  const { user } = useAuth();
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -79,16 +77,14 @@ export default function ArtworksPage() {
                     <td>{artwork.quantity}</td>
                     <td>{artwork.location}</td>
                     <td className="actions-cell">
-                      <Link to={`/artworks/${artwork._id}/edit`}>Edit</Link>
-                      {user?.role === "admin" && (
-                        <button
-                          type="button"
-                          className="danger-button"
-                          onClick={() => handleDelete(artwork._id)}
-                        >
-                          Delete
-                        </button>
-                      )}
+                    <Link to={`/artworks/${artwork._id}/edit`}>Edit</Link>
+                    <button
+                        type="button"
+                        className="danger-button"
+                        onClick={() => handleDelete(artwork._id)}
+                    >
+                        Delete
+                    </button>
                     </td>
                   </tr>
                 ))}

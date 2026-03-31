@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Artwork from "@/models/Artwork";
-import { requireRole } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { withCors, handleOptions } from "@/lib/cors";
 
 export function OPTIONS() {
@@ -10,7 +10,7 @@ export function OPTIONS() {
 
 export async function GET(request) {
   try {
-    requireRole(request, ["admin", "staff"]);
+    requireAuth(request);
     await connectDB();
 
     const { searchParams } = new URL(request.url);
@@ -61,25 +61,27 @@ export async function GET(request) {
 
     return withCors(
       NextResponse.json({
-      success: true,
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-      data: artworks
-    }));
+        success: true,
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        data: artworks
+      })
+    );
   } catch (error) {
     return withCors(
       NextResponse.json(
-      { success: false, error: error.message },
-      { status: error.message.includes("permission") || error.message.includes("token") ? 401 : 500 }
-    ));
+        { success: false, error: error.message },
+        { status: error.message.includes("token") ? 401 : 500 }
+      )
+    );
   }
 }
 
 export async function POST(request) {
   try {
-    requireRole(request, ["admin", "staff"]);
+    requireAuth(request);
     await connectDB();
 
     const body = await request.json();
@@ -87,9 +89,10 @@ export async function POST(request) {
     if (!body.title || !body.title.trim()) {
       return withCors(
         NextResponse.json(
-        { success: false, error: "Title is required" },
-        { status: 400 }
-      ));
+          { success: false, error: "Title is required" },
+          { status: 400 }
+        )
+      );
     }
 
     const artwork = await Artwork.create({
@@ -100,18 +103,20 @@ export async function POST(request) {
 
     return withCors(
       NextResponse.json(
-      {
-        success: true,
-        message: "Artwork created successfully",
-        data: artwork
-      },
-      { status: 201 }
-    ));
+        {
+          success: true,
+          message: "Artwork created successfully",
+          data: artwork
+        },
+        { status: 201 }
+      )
+    );
   } catch (error) {
     return withCors(
       NextResponse.json(
-      { success: false, error: error.message },
-      { status: error.message.includes("permission") || error.message.includes("token") ? 401 : 400 }
-    ));
+        { success: false, error: error.message },
+        { status: error.message.includes("token") ? 401 : 400 }
+      )
+    );
   }
 }

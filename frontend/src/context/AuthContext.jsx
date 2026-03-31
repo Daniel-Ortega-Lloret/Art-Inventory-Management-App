@@ -38,12 +38,11 @@ export function AuthProvider({ children }) {
     return response.data.user;
   }
 
-  async function register(name, email, password, role = "staff") {
+  async function register(name, email, password) {
     const response = await api.post("/auth/register", {
       name,
       email,
-      password,
-      role
+      password
     });
 
     localStorage.setItem("token", response.data.token);

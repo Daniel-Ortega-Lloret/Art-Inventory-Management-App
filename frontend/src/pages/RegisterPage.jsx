@@ -9,8 +9,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    password: "",
-    role: "staff"
+    password: ""
   });
 
   const [error, setError] = useState("");
@@ -29,7 +28,7 @@ export default function RegisterPage() {
     setSubmitting(true);
 
     try {
-      await register(form.name, form.email, form.password, form.role);
+      await register(form.name, form.email, form.password);
       navigate("/");
     } catch (err) {
       setError(
@@ -78,14 +77,6 @@ export default function RegisterPage() {
               onChange={handleChange}
               required
             />
-          </label>
-
-          <label>
-            Role
-            <select name="role" value={form.role} onChange={handleChange}>
-              <option value="staff">Staff</option>
-              <option value="admin">Admin</option>
-            </select>
           </label>
 
           {error && <p className="error-text">{error}</p>}
