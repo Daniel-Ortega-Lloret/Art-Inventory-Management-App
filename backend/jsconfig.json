@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "moduleResolution": "node",
+    "checkJs": false
+  },
+  "exclude": [
+    "node_modules",
+    ".next"
+  ],
+  "typeAcquisition": {
+    "enable": false
+  }
+}
