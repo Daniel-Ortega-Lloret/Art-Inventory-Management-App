@@ -10,7 +10,7 @@ export default function AboutPage() {
 
       <h2>How the application works</h2>
       <p>
-        Users can browse artworks, add new artworks, update existing entries,
+        Users can browse and view art, add new artworks, update existing entries,
         and delete artworks through REST API endpoints.
       </p>
 

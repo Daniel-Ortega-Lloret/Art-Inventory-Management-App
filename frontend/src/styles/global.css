@@ -302,3 +302,18 @@ button:disabled,
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.nav-button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.nav-button-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
