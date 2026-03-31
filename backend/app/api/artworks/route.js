@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Artwork from "@/models/Artwork";
 import { requireRole } from "@/lib/auth";
+import { withCors, handleOptions } from "@/lib/cors";
+
+export function OPTIONS() {
+  return handleOptions();
+}
 
 export async function GET(request) {
   try {
@@ -54,19 +59,21 @@ export async function GET(request) {
 
     const total = await Artwork.countDocuments(query);
 
-    return NextResponse.json({
+    return withCors(
+      NextResponse.json({
       success: true,
       page,
       limit,
       total,
       totalPages: Math.ceil(total / limit),
       data: artworks
-    });
+    }));
   } catch (error) {
-    return NextResponse.json(
+    return withCors(
+      NextResponse.json(
       { success: false, error: error.message },
       { status: error.message.includes("permission") || error.message.includes("token") ? 401 : 500 }
-    );
+    ));
   }
 }
 
@@ -78,10 +85,11 @@ export async function POST(request) {
     const body = await request.json();
 
     if (!body.title || !body.title.trim()) {
-      return NextResponse.json(
+      return withCors(
+        NextResponse.json(
         { success: false, error: "Title is required" },
         { status: 400 }
-      );
+      ));
     }
 
     const artwork = await Artwork.create({
@@ -90,18 +98,20 @@ export async function POST(request) {
       artist: body.artist?.trim() || "Unknown"
     });
 
-    return NextResponse.json(
+    return withCors(
+      NextResponse.json(
       {
         success: true,
         message: "Artwork created successfully",
         data: artwork
       },
       { status: 201 }
-    );
+    ));
   } catch (error) {
-    return NextResponse.json(
+    return withCors(
+      NextResponse.json(
       { success: false, error: error.message },
       { status: error.message.includes("permission") || error.message.includes("token") ? 401 : 400 }
-    );
+    ));
   }
 }
