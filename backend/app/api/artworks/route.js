@@ -3,9 +3,56 @@ import connectDB from "@/lib/mongodb";
 import Artwork from "@/models/Artwork";
 import { requireAuth } from "@/lib/auth";
 import { withCors, handleOptions } from "@/lib/cors";
+import { errorResponse } from "@/lib/errors";
 
 export function OPTIONS() {
   return handleOptions();
+}
+
+const ALLOWED_SEARCH_FIELDS = [
+  "title",
+  "artist",
+  "department"
+];
+
+const ALLOWED_SORT_FIELDS = [
+  "title",
+  "artist",
+  "department",
+  "classification"
+];
+
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function buildSortObject(sortParam) {
+  if (!sortParam) {
+    return { createdAt: -1 };
+  }
+
+  const sortObject = {};
+  const parts = sortParam.split(",");
+
+  for (const part of parts) {
+    const [field, direction] = part.split(":");
+
+    if (!ALLOWED_SORT_FIELDS.includes(field)) {
+      continue;
+    }
+
+    if (direction === "asc") {
+      sortObject[field] = 1;
+    } else if (direction === "desc") {
+      sortObject[field] = -1;
+    }
+  }
+
+  if (Object.keys(sortObject).length === 0) {
+    return { createdAt: -1 };
+  }
+
+  return sortObject;
 }
 
 export async function GET(request) {
@@ -16,43 +63,32 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
 
     const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "20", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
     const search = searchParams.get("search") || "";
-    const artist = searchParams.get("artist") || "";
-    const classification = searchParams.get("classification") || "";
-    const department = searchParams.get("department") || "";
-    const sort = searchParams.get("sort") || "createdAt_desc";
+    const searchField = searchParams.get("searchField") || "";
+    const sort = searchParams.get("sort") || "";
 
     const skip = (page - 1) * limit;
-
     const query = {};
 
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { artist: { $regex: search, $options: "i" } },
-        { medium: { $regex: search, $options: "i" } },
-        { accessionNumber: { $regex: search, $options: "i" } }
-      ];
+    if (search.trim()) {
+      const safeSearch = escapeRegex(search.trim());
+
+      if (searchField && ALLOWED_SEARCH_FIELDS.includes(searchField)) {
+        query[searchField] = { $regex: `^${safeSearch}`, $options: "i" };
+      } else {
+        query.$or = ALLOWED_SEARCH_FIELDS.map((field) => ({
+          [field]: { $regex: safeSearch, $options: "i" }
+        }));
+      }
     }
 
-    if (artist) query.artist = { $regex: artist, $options: "i" };
-    if (classification) query.classification = classification;
-    if (department) query.department = department;
-
-    let sortOption = { createdAt: -1 };
-
-    if (sort === "title_asc") sortOption = { title: 1 };
-    if (sort === "title_desc") sortOption = { title: -1 };
-    if (sort === "artist_asc") sortOption = { artist: 1 };
-    if (sort === "artist_desc") sortOption = { artist: -1 };
-    if (sort === "price_asc") sortOption = { price: 1 };
-    if (sort === "price_desc") sortOption = { price: -1 };
-    if (sort === "quantity_asc") sortOption = { quantity: 1 };
-    if (sort === "quantity_desc") sortOption = { quantity: -1 };
-    if (sort === "createdAt_asc") sortOption = { createdAt: 1 };
+    const sortOption = buildSortObject(sort);
 
     const artworks = await Artwork.find(query)
+      // Make sorting case-insensitive so 'a' does not get sorted above 'X'
+      // Also make it order numerically for fields like date or dimensions
+      .collation({ locale: "en", strength: 2, numericOrdering: true })
       .sort(sortOption)
       .skip(skip)
       .limit(limit);
@@ -71,9 +107,11 @@ export async function GET(request) {
     );
   } catch (error) {
     return withCors(
-      NextResponse.json(
-        { success: false, error: error.message },
-        { status: error.message.includes("token") ? 401 : 500 }
+      errorResponse(
+        NextResponse,
+        error,
+        "Failed to fetch artworks",
+        error.message.includes("token") ? 401 : 500
       )
     );
   }
@@ -113,9 +151,11 @@ export async function POST(request) {
     );
   } catch (error) {
     return withCors(
-      NextResponse.json(
-        { success: false, error: error.message },
-        { status: error.message.includes("token") ? 401 : 400 }
+      errorResponse(
+        NextResponse,
+        error,
+        "Failed to create artwork",
+        error.message.includes("token") ? 401 : 400
       )
     );
   }

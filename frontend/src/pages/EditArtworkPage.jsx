@@ -11,6 +11,7 @@ export default function EditArtworkPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     async function fetchArtwork() {
@@ -31,10 +32,13 @@ export default function EditArtworkPage() {
     try {
       setSubmitting(true);
       setError("");
+      setFieldErrors({});
+
       await api.put(`/artworks/${id}`, values);
       navigate("/artworks");
     } catch (err) {
       setError(err.response?.data?.error || "Failed to update artwork");
+      setFieldErrors(err.response?.data?.fieldErrors || {});
     } finally {
       setSubmitting(false);
     }
@@ -48,12 +52,13 @@ export default function EditArtworkPage() {
     <div className="page">
       <div className="card">
         <h1>Edit Artwork</h1>
-        {error && <p className="error-text">{error}</p>}
         {artwork && (
           <ArtworkForm
             initialValues={artwork}
             onSubmit={handleUpdate}
             submitting={submitting}
+            serverFieldErrors={fieldErrors}
+            formError={error}
           />
         )}
       </div>

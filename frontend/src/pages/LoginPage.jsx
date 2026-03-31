@@ -12,6 +12,7 @@ export default function LoginPage() {
   });
 
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
   function handleChange(event) {
@@ -19,16 +20,43 @@ export default function LoginPage() {
       ...prev,
       [event.target.name]: event.target.value
     }));
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      [event.target.name]: ""
+    }));
+  }
+
+  function validate() {
+    const errors = {};
+
+    if (!form.email.trim()) {
+      errors.email = "Email is required";
+    }
+
+    if (!form.password) {
+      errors.password = "Password is required";
+    }
+
+    return errors;
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
+
+    const errors = validate();
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
     setSubmitting(true);
 
     try {
-      await login(form.email, form.password);
-      navigate("/");
+      await login(form.email.trim(), form.password);
+      navigate("/artworks");
     } catch (err) {
       setError(
         err.response?.data?.error || "Login failed. Please check your credentials."
@@ -54,6 +82,7 @@ export default function LoginPage() {
               onChange={handleChange}
               required
             />
+            {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
           </label>
 
           <label>
@@ -65,6 +94,7 @@ export default function LoginPage() {
               onChange={handleChange}
               required
             />
+            {fieldErrors.password && <p className="field-error">{fieldErrors.password}</p>}
           </label>
 
           {error && <p className="error-text">{error}</p>}

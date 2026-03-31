@@ -33,10 +33,12 @@ export async function GET(request, context) {
     );
   } catch (error) {
     return withCors(
-      NextResponse.json(
-        { success: false, error: error.message },
-        { status: 400 }
-      )
+        errorResponse(
+            NextResponse,
+            error,
+            "Failed to get artwork",
+            400
+        )
     );
   }
 }
@@ -80,10 +82,12 @@ export async function PUT(request, context) {
     );
   } catch (error) {
     return withCors(
-      NextResponse.json(
-        { success: false, error: error.message },
-        { status: 400 }
-      )
+        errorResponse(
+            NextResponse,
+            error,
+            "Failed to update artwork",
+            400
+        )
     );
   }
 }
@@ -113,10 +117,12 @@ export async function DELETE(request, context) {
     );
   } catch (error) {
     return withCors(
-      NextResponse.json(
-        { success: false, error: error.message },
-        { status: 400 }
-      )
+        errorResponse(
+            NextResponse,
+            error,
+            "Failed to delete artwork",
+            400
+        )
     );
   }
 }

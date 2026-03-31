@@ -31,12 +31,7 @@ const artworkSchema = new mongoose.Schema(
     heightCm: Number,
     widthCm: Number,
     creditLine: String,
-    accessionNumber: String,
-
-    price: Number,
-    quantity: Number,
-    location: String,
-    onDisplay: Boolean
+    accessionNumber: String
   },
   { timestamps: true }
 );
@@ -87,12 +82,7 @@ function mapArtwork(item) {
     heightCm: firstNumber(item["Height (cm)"], null),
     widthCm: firstNumber(item["Width (cm)"], null),
     creditLine: item.CreditLine || "",
-    accessionNumber: item.AccessionNumber || "",
-
-    price: Math.floor(Math.random() * 9000) + 1000,
-    quantity: 1,
-    location: "Main Storage",
-    onDisplay: Boolean(item.OnView && item.OnView.trim() !== "")
+    accessionNumber: item.AccessionNumber || ""
   };
 }
 

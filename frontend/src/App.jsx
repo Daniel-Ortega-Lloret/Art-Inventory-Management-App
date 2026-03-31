@@ -1,13 +1,13 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import DashboardPage from "./pages/DashboardPage";
 import ArtworksPage from "./pages/ArtworksPage";
 import CreateArtworkPage from "./pages/CreateArtworkPage";
 import EditArtworkPage from "./pages/EditArtworkPage";
+import ViewArtworkPage from "./pages/ViewArtworkPage";
 
 export default function App() {
   return (
@@ -20,11 +20,7 @@ export default function App() {
 
           <Route
             path="/"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
+            element={<Navigate to="/artworks" replace />}
           />
 
           <Route
@@ -41,6 +37,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <CreateArtworkPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/artworks/:id"
+            element={
+              <ProtectedRoute>
+                <ViewArtworkPage />
               </ProtectedRoute>
             }
           />

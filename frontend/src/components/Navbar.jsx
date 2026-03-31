@@ -13,10 +13,9 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        <Link to="/" className="brand">Art Inventory</Link>
+        <Link to="/artworks" className="brand">Art Inventory</Link>
         {user && (
           <>
-            <Link to="/">Dashboard</Link>
             <Link to="/artworks">Artworks</Link>
             <Link to="/artworks/new">Add Artwork</Link>
           </>
@@ -26,9 +25,7 @@ export default function Navbar() {
       <div className="navbar-right">
         {user ? (
           <>
-            <span className="user-badge">
-              {user.name}
-            </span>
+            <span className="user-badge">{user.name}</span>
             <button onClick={handleLogout}>Logout</button>
           </>
         ) : (

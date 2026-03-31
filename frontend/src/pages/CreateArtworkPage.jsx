@@ -7,15 +7,19 @@ export default function CreateArtworkPage() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   async function handleCreate(values) {
     try {
       setSubmitting(true);
       setError("");
+      setFieldErrors({});
+
       await api.post("/artworks", values);
       navigate("/artworks");
     } catch (err) {
       setError(err.response?.data?.error || "Failed to create artwork");
+      setFieldErrors(err.response?.data?.fieldErrors || {});
     } finally {
       setSubmitting(false);
     }
@@ -25,8 +29,12 @@ export default function CreateArtworkPage() {
     <div className="page">
       <div className="card">
         <h1>Add Artwork</h1>
-        {error && <p className="error-text">{error}</p>}
-        <ArtworkForm onSubmit={handleCreate} submitting={submitting} />
+        <ArtworkForm
+          onSubmit={handleCreate}
+          submitting={submitting}
+          serverFieldErrors={fieldErrors}
+          formError={error}
+        />
       </div>
     </div>
   );

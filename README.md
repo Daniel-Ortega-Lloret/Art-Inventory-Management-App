@@ -9,3 +9,14 @@ Run these commands:
 - docker up up -d
 - npm run seed
 - npm run dev
+
+
+# How to run frontend
+
+Open a terminal
+
+Run these commands
+
+- cd frontend
+- npm install
+- npm run dev

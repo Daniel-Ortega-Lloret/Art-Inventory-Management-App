@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 const defaultValues = {
   title: "",
@@ -7,52 +7,142 @@ const defaultValues = {
   classification: "",
   department: "",
   accessionNumber: "",
-  price: 0,
-  quantity: 1,
-  location: "Main Storage",
-  onDisplay: false
+  onView: ""
 };
 
-export default function ArtworkForm({ initialValues = defaultValues, onSubmit, submitting }) {
+export default function ArtworkForm({
+  initialValues = defaultValues,
+  onSubmit,
+  submitting,
+  serverFieldErrors = {},
+  formError = ""
+}) {
   const [form, setForm] = useState({
     ...defaultValues,
     ...initialValues
   });
 
+  const [clientErrors, setClientErrors] = useState({});
+
+  const mergedErrors = useMemo(
+    () => ({ ...serverFieldErrors, ...clientErrors }),
+    [serverFieldErrors, clientErrors]
+  );
+
+  function validate(values) {
+    const errors = {};
+
+    if (!values.title || !values.title.trim()) {
+      errors.title = "Title is required";
+    } else if (values.title.trim().length > 200) {
+      errors.title = "Title cannot exceed 200 characters";
+    }
+
+    if (values.artist && values.artist.trim().length > 120) {
+      errors.artist = "Artist name cannot exceed 120 characters";
+    }
+
+    if (values.medium && values.medium.trim().length > 200) {
+      errors.medium = "Medium cannot exceed 200 characters";
+    }
+
+    if (values.classification && values.classification.trim().length > 100) {
+      errors.classification = "Classification cannot exceed 100 characters";
+    }
+
+    if (values.department && values.department.trim().length > 150) {
+      errors.department = "Department cannot exceed 150 characters";
+    }
+
+    if (values.accessionNumber && values.accessionNumber.trim().length > 100) {
+      errors.accessionNumber = "Accession number cannot exceed 100 characters";
+    }
+
+    if (values.onView && values.onView.trim().length > 200) {
+      errors.onView = "On view cannot exceed 200 characters";
+    }
+
+    return errors;
+  }
+
   function handleChange(event) {
-    const { name, value, type, checked } = event.target;
+    const { name, value } = event.target;
 
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value
+      [name]: value
+    }));
+
+    setClientErrors((prev) => ({
+      ...prev,
+      [name]: ""
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
-    onSubmit({
+    const cleanedForm = {
       ...form,
-      price: Number(form.price),
-      quantity: Number(form.quantity)
-    });
+      title: form.title.trim(),
+      artist: form.artist.trim(),
+      medium: form.medium.trim(),
+      classification: form.classification.trim(),
+      department: form.department.trim(),
+      accessionNumber: form.accessionNumber.trim(),
+      onView: form.onView.trim()
+    };
+
+    const errors = validate(cleanedForm);
+    setClientErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    await onSubmit(cleanedForm);
+  }
+
+  function renderError(fieldName) {
+    if (!mergedErrors[fieldName]) return null;
+    return <p className="field-error">{mergedErrors[fieldName]}</p>;
   }
 
   return (
     <form onSubmit={handleSubmit} className="form">
+      {formError && <p className="error-text">{formError}</p>}
+
       <label>
         Title
-        <input name="title" value={form.title} onChange={handleChange} required />
+        <input
+          name="title"
+          value={form.title}
+          onChange={handleChange}
+          required
+        />
+        {renderError("title")}
       </label>
 
       <label>
         Artist
-        <input name="artist" value={form.artist} onChange={handleChange} />
+        <input
+          name="artist"
+          value={form.artist}
+          onChange={handleChange}
+          required
+        />
+        {renderError("artist")}
       </label>
 
       <label>
         Medium
-        <input name="medium" value={form.medium} onChange={handleChange} />
+        <input
+          name="medium"
+          value={form.medium}
+          onChange={handleChange}
+          required
+        />
+        {renderError("medium")}
       </label>
 
       <label>
@@ -61,12 +151,20 @@ export default function ArtworkForm({ initialValues = defaultValues, onSubmit, s
           name="classification"
           value={form.classification}
           onChange={handleChange}
+          required
         />
+        {renderError("classification")}
       </label>
 
       <label>
         Department
-        <input name="department" value={form.department} onChange={handleChange} />
+        <input
+          name="department"
+          value={form.department}
+          onChange={handleChange}
+          required
+        />
+        {renderError("department")}
       </label>
 
       <label>
@@ -75,44 +173,20 @@ export default function ArtworkForm({ initialValues = defaultValues, onSubmit, s
           name="accessionNumber"
           value={form.accessionNumber}
           onChange={handleChange}
+          required
         />
+        {renderError("accessionNumber")}
       </label>
 
       <label>
-        Price
+        On View
         <input
-          type="number"
-          name="price"
-          value={form.price}
+          name="onView"
+          value={form.onView}
           onChange={handleChange}
-          min="0"
+          required
         />
-      </label>
-
-      <label>
-        Quantity
-        <input
-          type="number"
-          name="quantity"
-          value={form.quantity}
-          onChange={handleChange}
-          min="0"
-        />
-      </label>
-
-      <label>
-        Location
-        <input name="location" value={form.location} onChange={handleChange} />
-      </label>
-
-      <label className="checkbox-label">
-        <input
-          type="checkbox"
-          name="onDisplay"
-          checked={form.onDisplay}
-          onChange={handleChange}
-        />
-        On Display
+        {renderError("onView")}
       </label>
 
       <button type="submit" disabled={submitting}>

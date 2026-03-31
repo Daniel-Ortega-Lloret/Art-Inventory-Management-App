@@ -13,6 +13,7 @@ export default function RegisterPage() {
   });
 
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
   function handleChange(event) {
@@ -20,16 +21,51 @@ export default function RegisterPage() {
       ...prev,
       [event.target.name]: event.target.value
     }));
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      [event.target.name]: ""
+    }));
+  }
+
+  function validate() {
+    const errors = {};
+
+    if (!form.name.trim()) {
+      errors.name = "Name is required";
+    }
+
+    if (!form.email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
+      errors.email = "Enter a valid email address";
+    }
+
+    if (!form.password) {
+      errors.password = "Password is required";
+    } else if (form.password.length < 6) {
+      errors.password = "Password must be at least 6 characters long";
+    }
+
+    return errors;
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
+
+    const errors = validate();
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
     setSubmitting(true);
 
     try {
-      await register(form.name, form.email, form.password);
-      navigate("/");
+      await register(form.name.trim(), form.email.trim(), form.password);
+      navigate("/artworks");
     } catch (err) {
       setError(
         err.response?.data?.error || "Registration failed. Please try again."
@@ -55,6 +91,7 @@ export default function RegisterPage() {
               onChange={handleChange}
               required
             />
+            {fieldErrors.name && <p className="field-error">{fieldErrors.name}</p>}
           </label>
 
           <label>
@@ -66,6 +103,7 @@ export default function RegisterPage() {
               onChange={handleChange}
               required
             />
+            {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
           </label>
 
           <label>
@@ -77,6 +115,7 @@ export default function RegisterPage() {
               onChange={handleChange}
               required
             />
+            {fieldErrors.password && <p className="field-error">{fieldErrors.password}</p>}
           </label>
 
           {error && <p className="error-text">{error}</p>}
