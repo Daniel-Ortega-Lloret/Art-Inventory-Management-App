@@ -1,13 +1,29 @@
+/**
+ * Artwork detail page
+ * This page:
+ * - Fetches one artwork by id from the backend
+ * - Displays the artwork image and metadata
+ * - Provides a link back to the previous artworks list state
+ * - Falls back gracefully if the image cannot be loaded
+ */
+
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import api from "../api/axios";
 
 export default function ViewArtworkPage() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+
+  // Preserve the previous artworks page state so the back link can restore it
+  const from = searchParams.get("from") || "/artworks";
+
   const [artwork, setArtwork] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [imageFailed, setImageFailed] = useState(false);
 
+  // Fetch the artwork details when the page loads or the id changes
   useEffect(() => {
     async function fetchArtwork() {
       try {
@@ -58,7 +74,7 @@ export default function ViewArtworkPage() {
           <Link to={`/artworks/${artwork._id}/edit`} className="button-link">
             Edit
           </Link>
-          <Link to="/artworks" className="button-link secondary-button">
+          <Link to={from} className="button-link secondary-button">
             Back to Artworks
           </Link>
         </div>
@@ -66,11 +82,12 @@ export default function ViewArtworkPage() {
 
       <div className="artwork-detail-layout">
         <div className="card artwork-image-card">
-          {artwork.imageURL ? (
+          {artwork.imageURL && !imageFailed ? (
             <img
               src={artwork.imageURL}
               alt={artwork.title}
               className="artwork-detail-image"
+              onError={() => setImageFailed(true)}
             />
           ) : (
             <div className="image-placeholder">

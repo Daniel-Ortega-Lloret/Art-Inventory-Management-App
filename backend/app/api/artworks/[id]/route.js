@@ -1,18 +1,32 @@
+/**
+ * This route handles operations for a single artwork document.
+ * It supports:
+ * - GET: fetch one artwork by its MongoDB id
+ * - PUT: update one artwork by id
+ * - DELETE: remove one artwork by id
+ * All routes require a valid authenticated user.
+ */
+
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Artwork from "@/models/Artwork";
 import { requireAuth } from "@/lib/auth";
 import { withCors, handleOptions } from "@/lib/cors";
+import { errorResponse } from "@/lib/errors";
 
+// Handle browser preflight requests for CORS
 export function OPTIONS() {
   return handleOptions();
 }
 
+// Get a single artwork by id.
 export async function GET(request, context) {
   try {
+    // Ensure the user is logged in before allowing access
     requireAuth(request);
     await connectDB();
 
+    // Dynamic route parameters in Next.js must be awaited
     const { id } = await context.params;
     const artwork = await Artwork.findById(id);
 
@@ -33,16 +47,17 @@ export async function GET(request, context) {
     );
   } catch (error) {
     return withCors(
-        errorResponse(
-            NextResponse,
-            error,
-            "Failed to get artwork",
-            400
-        )
+      errorResponse(
+        NextResponse,
+        error,
+        "Failed to get artwork",
+        400
+      )
     );
   }
 }
 
+// Update a single artwork by id
 export async function PUT(request, context) {
   try {
     requireAuth(request);
@@ -51,6 +66,7 @@ export async function PUT(request, context) {
     const { id } = await context.params;
     const body = await request.json();
 
+    // Trim common string fields before saving
     const artwork = await Artwork.findByIdAndUpdate(
       id,
       {
@@ -82,16 +98,17 @@ export async function PUT(request, context) {
     );
   } catch (error) {
     return withCors(
-        errorResponse(
-            NextResponse,
-            error,
-            "Failed to update artwork",
-            400
-        )
+      errorResponse(
+        NextResponse,
+        error,
+        "Failed to update artwork",
+        400
+      )
     );
   }
 }
 
+// Delete a single artwork by id
 export async function DELETE(request, context) {
   try {
     requireAuth(request);
@@ -106,7 +123,7 @@ export async function DELETE(request, context) {
           { success: false, error: "Artwork not found" },
           { status: 404 }
         )
-      )
+      );
     }
 
     return withCors(
@@ -117,12 +134,12 @@ export async function DELETE(request, context) {
     );
   } catch (error) {
     return withCors(
-        errorResponse(
-            NextResponse,
-            error,
-            "Failed to delete artwork",
-            400
-        )
+      errorResponse(
+        NextResponse,
+        error,
+        "Failed to delete artwork",
+        400
+      )
     );
   }
 }

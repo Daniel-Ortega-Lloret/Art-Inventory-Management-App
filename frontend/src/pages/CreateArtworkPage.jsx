@@ -1,3 +1,9 @@
+/**
+ * Page for creating a new artwork entry
+ * This page renders the reusable ArtworkForm component
+ * and sends the submitted data to the backend API
+ */
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ArtworkForm from "../components/ArtworkForm";
@@ -9,6 +15,7 @@ export default function CreateArtworkPage() {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
 
+  // Submit the new artwork to the backend and redirect on success
   async function handleCreate(values) {
     try {
       setSubmitting(true);

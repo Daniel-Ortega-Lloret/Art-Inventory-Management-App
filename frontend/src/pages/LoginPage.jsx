@@ -1,3 +1,12 @@
+/**
+ * Login page for staff users
+ * This page:
+ * - Collects email and password
+ * - Performs basic client-side validation
+ * - Calls the login function from AuthContext
+ * - Redirects to the artworks page on success
+ */
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
@@ -15,6 +24,7 @@ export default function LoginPage() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
+  // Update form state and clear any field-level error as the user types
   function handleChange(event) {
     setForm((prev) => ({
       ...prev,
@@ -27,6 +37,7 @@ export default function LoginPage() {
     }));
   }
 
+  // Basic client-side validation before submitting
   function validate() {
     const errors = {};
 
@@ -41,6 +52,7 @@ export default function LoginPage() {
     return errors;
   }
 
+  // Submit the login request and redirect on success
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");

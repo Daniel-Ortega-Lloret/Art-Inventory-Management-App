@@ -1,3 +1,10 @@
+/**
+ * Mongoose schema for artwork documents
+ * Represents a single artwork in the inventory system
+ * Includes validation rules to ensure data consistency
+ */
+
+
 import mongoose from "mongoose";
 
 const ArtworkSchema = new mongoose.Schema(
@@ -34,14 +41,14 @@ const ArtworkSchema = new mongoose.Schema(
     beginDate: {
       type: Number,
       default: null,
-      min: [-3000, "Begin date is too low"],
-      max: [3000, "Begin date is too high"]
+      min: [0, "Begin date is too low"],
+      max: [2030, "Begin date is too high"]
     },
     endDate: {
       type: Number,
       default: null,
-      min: [-3000, "End date is too low"],
-      max: [3000, "End date is too high"]
+      min: [0, "End date is too low"],
+      max: [2030, "End date is too high"]
     },
     date: {
       type: String,

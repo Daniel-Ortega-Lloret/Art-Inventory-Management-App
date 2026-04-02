@@ -1,3 +1,9 @@
+/**
+ * Main navigation bar for the application
+ * Displays navigation links for authenticated users,
+ * as well as a logout button and a link to the About page
+ */
+
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 
@@ -7,6 +13,7 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  // Clear auth state and send the user back to the login page
   function handleLogout() {
     logout();
     navigate("/login");

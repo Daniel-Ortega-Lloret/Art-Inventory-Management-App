@@ -1,3 +1,13 @@
+/**
+ * Main application component
+ * This file sets up:
+ * - Authentication context
+ * - React Router
+ * - Public routes (login and register)
+ * - Protected routes for artwork management
+ * - Default redirect from "/" to "/artworks"
+ */
+
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -15,14 +25,17 @@ export default function App() {
       <BrowserRouter>
         <Navbar />
         <Routes>
+          {/* Public authentication routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
+          {/* Redirect the root path to the main artworks page */}
           <Route
             path="/"
             element={<Navigate to="/artworks" replace />}
           />
 
+          {/* Protected routes require authentication */}
           <Route
             path="/artworks"
             element={

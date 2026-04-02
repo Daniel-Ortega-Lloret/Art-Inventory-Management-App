@@ -1,3 +1,9 @@
+/**
+ * Mongoose schema for user accounts
+ * Represents staff members who can log into the system
+ * Stores authentication credentials and account status
+ */
+
 import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
@@ -20,7 +26,7 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["admin", "staff"],
+      enum: ["staff"],
       default: "staff"
     },
     isActive: {

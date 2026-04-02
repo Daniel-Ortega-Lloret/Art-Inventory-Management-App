@@ -1,3 +1,12 @@
+/**
+ * Reusable form component for creating and editing artworks
+ * This component:
+ * - Displays input fields for editable artwork properties
+ * - Performs client-side validation before submit
+ * - Merges backend field errors with local validation errors
+ * - Calls the supplied onSubmit handler with cleaned form data
+ */
+
 import { useMemo, useState } from "react";
 
 const defaultValues = {
@@ -24,11 +33,13 @@ export default function ArtworkForm({
 
   const [clientErrors, setClientErrors] = useState({});
 
+  // Combine server-side and client-side errors into one object for display
   const mergedErrors = useMemo(
     () => ({ ...serverFieldErrors, ...clientErrors }),
     [serverFieldErrors, clientErrors]
   );
 
+  // Validate fields before submitting to the backend
   function validate(values) {
     const errors = {};
 
@@ -65,6 +76,7 @@ export default function ArtworkForm({
     return errors;
   }
 
+  // Update the local form state and clear any existing client-side error for that field
   function handleChange(event) {
     const { name, value } = event.target;
 
@@ -79,6 +91,7 @@ export default function ArtworkForm({
     }));
   }
 
+  // Clean the input values, validate them, and submit if valid
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -103,6 +116,7 @@ export default function ArtworkForm({
     await onSubmit(cleanedForm);
   }
 
+  // Render a field-level error if one exists
   function renderError(fieldName) {
     if (!mergedErrors[fieldName]) return null;
     return <p className="field-error">{mergedErrors[fieldName]}</p>;

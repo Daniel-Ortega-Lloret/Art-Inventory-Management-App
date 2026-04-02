@@ -1,3 +1,11 @@
+/**
+ * Page for editing an existing artwork
+ * This page:
+ * - Loads the artwork by id from the backend
+ * - Passes the existing values into ArtworkForm
+ * - Sends the updated values back to the backend
+ */
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ArtworkForm from "../components/ArtworkForm";
@@ -13,6 +21,7 @@ export default function EditArtworkPage() {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
 
+  // Fetch the artwork details when the page loads
   useEffect(() => {
     async function fetchArtwork() {
       try {
@@ -28,6 +37,7 @@ export default function EditArtworkPage() {
     fetchArtwork();
   }, [id]);
 
+  // Send the updated artwork data to the backend
   async function handleUpdate(values) {
     try {
       setSubmitting(true);

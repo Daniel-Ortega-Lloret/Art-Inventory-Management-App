@@ -1,3 +1,12 @@
+/**
+ * Registration page for new staff accounts
+ * This page:
+ * - Collects name, email, and password
+ * - Performs client-side validation
+ * - Calls the register function from AuthContext
+ * - Redirects to the artworks page after successful registration
+ */
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
@@ -16,6 +25,7 @@ export default function RegisterPage() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
+  // Update form state and clear any field-level error as the user types
   function handleChange(event) {
     setForm((prev) => ({
       ...prev,
@@ -28,6 +38,7 @@ export default function RegisterPage() {
     }));
   }
 
+  // Basic client-side validation before sending to the backend
   function validate() {
     const errors = {};
 
@@ -50,6 +61,7 @@ export default function RegisterPage() {
     return errors;
   }
 
+  // Submit the registration request and redirect on success
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");

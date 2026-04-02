@@ -1,3 +1,14 @@
+/**
+ * Seed script for importing artwork data into MongoDB
+ *
+ * This script:
+ * - Loads environment variables
+ * - Connects to the MongoDB database
+ * - Reads the Artworks.json dataset from disk
+ * - Cleans and maps the raw dataset into the application schema
+ * - Inserts all artworks into the database
+ */
+
 require("dotenv").config({ path: ".env.local" });
 
 const mongoose = require("mongoose");
@@ -6,10 +17,16 @@ const path = require("path");
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
+// Ensure database connection string exists before running
 if (!MONGODB_URI) {
   throw new Error("Missing MONGODB_URI in .env.local");
 }
 
+/**
+ * Define a simplified Artwork schema for seeding
+ * This mirrors the main Artwork model structure but is defined locally
+ * to avoid dependency on ES module imports
+ */
 const artworkSchema = new mongoose.Schema(
   {
     sourceId: Number,
@@ -36,9 +53,14 @@ const artworkSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Reuse model if it already exists
 const Artwork =
   mongoose.models.Artwork || mongoose.model("Artwork", artworkSchema);
 
+/**
+ * Helper function to safely extract the first value from a field
+ * Some dataset fields may be arrays instead of strings
+ */
 function firstValue(value, fallback = "") {
   if (Array.isArray(value)) {
     return value.length > 0 ? value[0] : fallback;
@@ -46,6 +68,10 @@ function firstValue(value, fallback = "") {
   return value ?? fallback;
 }
 
+/**
+ * Helper function to safely extract numeric values
+ * Handles arrays, empty values, and invalid numbers
+ */
 function firstNumber(value, fallback = null) {
   const extracted = Array.isArray(value)
     ? value.length > 0
@@ -61,6 +87,13 @@ function firstNumber(value, fallback = null) {
   return Number.isNaN(parsed) ? fallback : parsed;
 }
 
+/**
+ * Map a raw dataset object into the application's Artwork format
+ * This ensures:
+ * - Consistent field names
+ * - Cleaned values
+ * - Defaults for missing data
+ */
 function mapArtwork(item) {
   return {
     sourceId: firstNumber(item.ObjectID, null),
@@ -86,20 +119,31 @@ function mapArtwork(item) {
   };
 }
 
+/**
+ * Main seeding function
+ * Connects to the database, reads the dataset, transforms it,
+ * clears existing records, and inserts fresh data
+ */
 async function seed() {
   try {
+    // Connect to MongoDB
     await mongoose.connect(MONGODB_URI, { dbName: "artmuseum" });
 
+    // Load dataset from file system
     const filePath = path.join(__dirname, "..", "data", "Artworks.json");
     const rawData = fs.readFileSync(filePath, "utf-8");
     const artworks = JSON.parse(rawData);
 
-    const subset = artworks.slice(0, 1000).map(mapArtwork);
+    // Transform dataset into application format
+    const mappedArtworks = artworks.map(mapArtwork);
 
+    // Remove existing data to avoid duplicates
     await Artwork.deleteMany({});
-    await Artwork.insertMany(subset);
 
-    console.log(`Seeded ${subset.length} artworks successfully`);
+    // Insert all mapped artworks into the database
+    await Artwork.insertMany(mappedArtworks);
+
+    console.log(`Seeded ${mappedArtworks.length} artworks successfully`);
     process.exit(0);
   } catch (error) {
     console.error("Seeding failed:", error);
@@ -107,4 +151,5 @@ async function seed() {
   }
 }
 
+// Run the seed script
 seed();

@@ -1,3 +1,9 @@
+/**
+ * This route handles staff user registration.
+ * It validates the submitted details, checks for duplicate email addresses,
+ * hashes the password, creates the user, and returns a JWT token
+ */
+
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import connectDB from "@/lib/mongodb";
@@ -5,10 +11,12 @@ import User from "@/models/User";
 import { signToken } from "@/lib/auth";
 import { withCors, handleOptions } from "@/lib/cors";
 
+// Handle browser preflight requests for CORS
 export function OPTIONS() {
   return handleOptions();
 }
 
+// Register a new staff user
 export async function POST(request) {
   try {
     await connectDB();
@@ -25,6 +33,7 @@ export async function POST(request) {
       );
     }
 
+    // Require a basic minimum password length
     if (password.length < 6) {
       return withCors(
         NextResponse.json(
@@ -34,6 +43,7 @@ export async function POST(request) {
       );
     }
 
+    // Prevent duplicate accounts with the same email address
     const existingUser = await User.findOne({ email: email.toLowerCase() });
 
     if (existingUser) {
@@ -45,6 +55,7 @@ export async function POST(request) {
       );
     }
 
+    // Hash the password before saving the user to MongoDB
     const passwordHash = await bcrypt.hash(password, 10);
 
     const user = await User.create({
