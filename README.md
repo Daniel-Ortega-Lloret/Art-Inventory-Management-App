@@ -65,6 +65,12 @@ Example:
 
 VITE_API_BASE_URL=http://localhost:3000/api
 
+The backend also requires this file:
+
+- https://github.com/MuseumofModernArt/collection/blob/main/Artworks.json
+
+If its missing, download it and place it in backend/data/
+
 ---
 
 ## How to use the application
